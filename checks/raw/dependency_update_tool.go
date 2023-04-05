@@ -40,7 +40,7 @@ func DependencyUpdateTool(c clients.RepoClient) (checker.DependencyUpdateToolDat
 		return checker.DependencyUpdateToolData{Tools: tools}, nil
 	}
 
-	commits, err := c.SearchCommits(clients.SearchCommitsOptions{Author: "dependabot[bot]"})
+	commits, err := c.ListCommits()
 	if err != nil {
 		return checker.DependencyUpdateToolData{}, fmt.Errorf("%w", err)
 	}
