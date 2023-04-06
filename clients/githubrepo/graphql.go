@@ -49,7 +49,8 @@ type graphqlData struct {
 						Oid           githubv4.GitObjectID
 						Author        struct {
 							User struct {
-								Login githubv4.String
+								DatabaseID githubv4.Int
+								Login      githubv4.String
 							}
 						}
 						Committer struct {
@@ -301,6 +302,7 @@ func commitsFrom(data *graphqlData, repoOwner, repoName string) ([]clients.Commi
 			Message:       string(commit.Message),
 			SHA:           string(commit.Oid),
 			Committer: clients.User{
+				ID:    int64(commit.Author.User.DatabaseID),
 				Login: committer,
 			},
 			AssociatedMergeRequest: associatedPR,
