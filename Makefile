@@ -128,11 +128,13 @@ build: ## Build all binaries and images in the repo.
 build: $(build-targets)
 
 build-proto: ## Compiles and generates all required protobufs
-build-proto: cron/data/request.pb.go cron/data/metadata.pb.go
+build-proto: cron/data/request.pb.go cron/data/metadata.pb.go policy/policy.pb.go
 cron/data/request.pb.go: cron/data/request.proto | $(PROTOC) $(PROTOC_GEN_GO)
 	$(PROTOC) --plugin=$(PROTOC_GEN_GO) --go_out=. --go_opt=paths=source_relative cron/data/request.proto
 cron/data/metadata.pb.go: cron/data/metadata.proto | $(PROTOC) $(PROTOC_GEN_GO)
 	$(PROTOC) --plugin=$(PROTOC_GEN_GO) --go_out=. --go_opt=paths=source_relative cron/data/metadata.proto
+policy/policy.pb.go: policy/policy.proto | $(PROTOC) $(PROTOC_GEN_GO)
+	$(PROTOC) --plugin=$(PROTOC_GEN_GO) --go_out=. --go_opt=paths=source_relative policy/policy.proto
 
 generate-mocks: ## Compiles and generates all mocks using mockgen.
 generate-mocks: clients/mockclients/repo_client.go \
