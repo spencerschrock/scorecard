@@ -200,10 +200,23 @@ func GetOSesForJob(job *actionlint.Job) ([]string, error) {
 			continue
 		}
 		for _, assign := range combination.Assigns {
-			if assign.Key == nil || assign.Key.Value != os || assign.Value == nil {
+			if assign.Key == nil || assign.Value == nil {
 				continue
 			}
-			jobOSes = append(jobOSes, strings.Trim(assign.Value.String(), "'\""))
+			switch assign.Key.Value {
+			case os:
+				jobOSes = append(jobOSes, strings.Trim(assign.Value.String(), "'\""))
+			default:
+				val := assign.Value.String()
+				switch {
+				case strings.Contains(val, "windows"):
+					jobOSes = append(jobOSes, "windows-latest")
+				case strings.Contains(val, "macos"):
+					jobOSes = append(jobOSes, "macos-latest")
+				case strings.Contains(val, "ubuntu"):
+					jobOSes = append(jobOSes, "ubuntu-latest")
+				}
+			}
 		}
 	}
 
