@@ -26,20 +26,20 @@ jobs:
           -H "Authorization: Bearer $GITHUB_TOKEN" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           https://api.github.com/repos/$REPOSITORY/pulls/$PULL_NUMBER > pr.json
-          echo "base=$(jq -r '.base.sha' pr.json)" >> "$GITHUB_OUTPUT"
-          echo "head=$(jq -r '.head.sha' pr.json)" >> "$GITHUB_OUTPUT"
+          echo "SCDIFF_BASE_SHA=$(jq -r '.base.sha' pr.json)" >> "$GITHUB_ENV"
+          echo "SCDIFF_HEAD_SHA=$(jq -r '.head.sha' pr.json)" >> "$GITHUB_ENV"
       - run: |
-          echo ${{ steps.pr-refs.outputs.base }}
-          echo ${{ steps.pr-refs.outputs.head }}
+          echo ${{ env.SCDIFF_BASE_SHA }}
+          echo ${{ env.SCDIFF_HEAD_SHA }}
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
-          ref: ${{ steps.pr-refs.outputs.base }}
+          ref: ${{ env.SCDIFF_BASE_SHA }}
       - name: generate before results
         run: |
           go run cmd/internal/scdiff/main.go generate --repos repos > before.json
       - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
-          ref: ${{ steps.pr-refs.outputs.head }}
+          ref: ${{ env.SCDIFF_HEAD_SHA }}
       - name: generate after results
         run: |
           go run cmd/internal/scdiff/main.go generate --repos repos > after.json
