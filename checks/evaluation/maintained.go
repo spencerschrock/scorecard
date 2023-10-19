@@ -36,7 +36,7 @@ func Maintained(name string, dl checker.DetailLogger, r *checker.MaintainedData)
 		return checker.CreateRuntimeErrorResult(name, e)
 	}
 
-	if r.ArchivedStatus.Status {
+	if !r.ArchivedStatus.Status {
 		return checker.CreateMinScoreResult(name, "repo is marked as archived")
 	}
 
