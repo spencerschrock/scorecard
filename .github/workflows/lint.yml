@@ -34,4 +34,7 @@ jobs:
         uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
-          only-new-issues: true
+          # true for non-dependabot users. false for dependabot
+          # this is to address situations where dependabot updates golangci-lint which may introduce new linters
+          # when this happens, we want to be able to flag all existing issues in the codebase
+          only-new-issues: ${{ github.actor != 'dependabot[bot]' }} 
