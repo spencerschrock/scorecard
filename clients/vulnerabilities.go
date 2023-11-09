@@ -16,6 +16,8 @@ package clients
 
 import (
 	"context"
+
+	"github.com/ossf/scorecard/v4/finding"
 )
 
 // VulnerabilitiesClient checks for vulnerabilities in vuln DB.
@@ -39,6 +41,7 @@ type VulnerabilitiesResponse struct {
 
 // Vulnerability uniquely identifies a reported security vuln.
 type Vulnerability struct {
-	ID      string
-	Aliases []string
+	ID       string
+	Location *finding.Location
+	Aliases  []string
 }

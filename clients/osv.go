@@ -19,9 +19,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/osv-scanner/pkg/models"
 	"github.com/google/osv-scanner/pkg/osvscanner"
 
 	sce "github.com/ossf/scorecard/v4/errors"
+	"github.com/ossf/scorecard/v4/finding"
 )
 
 var _ VulnerabilitiesClient = osvClient{}
@@ -65,8 +67,9 @@ func (v osvClient) ListUnfixedVulnerabilities(
 		vulns := res.Flatten()
 		for i := range vulns {
 			response.Vulnerabilities = append(response.Vulnerabilities, Vulnerability{
-				ID:      vulns[i].Vulnerability.ID,
-				Aliases: vulns[i].Vulnerability.Aliases,
+				ID:       vulns[i].Vulnerability.ID,
+				Aliases:  vulns[i].Vulnerability.Aliases,
+				Location: location(&vulns[i]),
 			})
 			// Remove duplicate vulnerability IDs for now as we don't report information
 			// on the source of each vulnerability yet, therefore having multiple identical
@@ -95,4 +98,15 @@ func removeDuplicate[T any, K comparable](sliceList []T, keyExtract func(T) K) [
 		}
 	}
 	return list
+}
+
+func location(vuln *models.VulnerabilityFlattened) *finding.Location {
+	if vuln == nil {
+		return nil
+	}
+	return &finding.Location{
+		Type:    finding.FileTypeSource,
+		Snippet: &vuln.Package.Name,
+		Path:    vuln.Source.Path,
+	}
 }
