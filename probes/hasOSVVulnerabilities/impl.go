@@ -56,7 +56,10 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 
 	aliasVulnerabilities := []grouper.IDAliases{}
 	for _, vuln := range raw.VulnerabilitiesResults.Vulnerabilities {
-		aliasVulnerabilities = append(aliasVulnerabilities, grouper.IDAliases(vuln))
+		aliasVulnerabilities = append(aliasVulnerabilities, grouper.IDAliases{
+			ID:      vuln.ID,
+			Aliases: vuln.Aliases,
+		})
 	}
 
 	IDs := grouper.Group(aliasVulnerabilities)
@@ -75,6 +78,7 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 		f = f.WithRemediationMetadata(map[string]string{
 			"osvid": vuln.IDs[0],
 		})
+		// todo need location here. really we should be grouping in raw data, not in the probe
 		findings = append(findings, *f)
 	}
 	return findings, Probe, nil
