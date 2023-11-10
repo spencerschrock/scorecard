@@ -18,9 +18,6 @@ package hasOSVVulnerabilities
 import (
 	"embed"
 	"fmt"
-	"strings"
-
-	"github.com/google/osv-scanner/pkg/grouper"
 
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/finding"
@@ -30,7 +27,12 @@ import (
 //go:embed *.yml
 var fs embed.FS
 
-const Probe = "hasOSVVulnerabilities"
+const (
+	Probe = "hasOSVVulnerabilities"
+
+	hasNoVulnText = "Project does not contain OSV vulnerabilities"
+	hasVulnText   = "Project contains OSV vulnerabilities"
+)
 
 func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 	if raw == nil {
@@ -41,9 +43,7 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 
 	// if no vulns were found
 	if len(raw.VulnerabilitiesResults.Vulnerabilities) == 0 {
-		f, err := finding.NewWith(fs, Probe,
-			"Project does not contain OSV vulnerabilities", nil,
-			finding.OutcomePositive)
+		f, err := finding.NewWith(fs, Probe, hasNoVulnText, nil, finding.OutcomePositive)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
@@ -51,29 +51,15 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 		return findings, Probe, nil
 	}
 
-	aliasVulnerabilities := []grouper.IDAliases{}
 	for _, vuln := range raw.VulnerabilitiesResults.Vulnerabilities {
-		aliasVulnerabilities = append(aliasVulnerabilities, grouper.IDAliases{
-			ID:      vuln.ID,
-			Aliases: vuln.Aliases,
-		})
-	}
-
-	IDs := grouper.Group(aliasVulnerabilities)
-
-	for _, vuln := range IDs {
-		f, err := finding.NewWith(fs, Probe,
-			"Project contains OSV vulnerabilities", nil,
-			finding.OutcomeNegative)
+		f, err := finding.NewWith(fs, Probe, hasVulnText, vuln.Location, finding.OutcomeNegative)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
-		f = f.WithMessage(fmt.Sprintf("Project is vulnerable to: %s",
-			strings.Join(vuln.IDs, " / ")))
+		f = f.WithMessage("Project is vulnerable to: " + vuln.ID)
 		f = f.WithRemediationMetadata(map[string]string{
-			"osvid": strings.Join(vuln.IDs[:], ","),
+			"osvid": vuln.ID,
 		})
-		// todo need location here. really we should be grouping in raw data, not in the probe
 		findings = append(findings, *f)
 	}
 	return findings, Probe, nil
