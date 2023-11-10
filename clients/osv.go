@@ -71,33 +71,12 @@ func (v osvClient) ListUnfixedVulnerabilities(
 				Aliases:  vulns[i].Vulnerability.Aliases,
 				Location: location(&vulns[i]),
 			})
-			// Remove duplicate vulnerability IDs for now as we don't report information
-			// on the source of each vulnerability yet, therefore having multiple identical
-			// vuln IDs might be confusing.
-			response.Vulnerabilities = removeDuplicate(
-				response.Vulnerabilities,
-				func(key Vulnerability) string { return key.ID },
-			)
 		}
 
 		return response, nil
 	}
 
 	return VulnerabilitiesResponse{}, fmt.Errorf("osvscanner.DoScan: %w", err)
-}
-
-// RemoveDuplicate removes duplicate entries from a slice.
-func removeDuplicate[T any, K comparable](sliceList []T, keyExtract func(T) K) []T {
-	allKeys := make(map[K]bool)
-	list := []T{}
-	for _, item := range sliceList {
-		key := keyExtract(item)
-		if _, value := allKeys[key]; !value {
-			allKeys[key] = true
-			list = append(list, item)
-		}
-	}
-	return list
 }
 
 func location(vuln *models.VulnerabilityFlattened) *finding.Location {
