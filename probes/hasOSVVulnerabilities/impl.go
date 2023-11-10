@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/google/osv-scanner/pkg/grouper"
-
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/finding"
 	"github.com/ossf/scorecard/v4/probes/internal/utils/uerror"
@@ -31,7 +30,12 @@ import (
 //go:embed *.yml
 var fs embed.FS
 
-const Probe = "hasOSVVulnerabilities"
+const (
+	Probe = "hasOSVVulnerabilities"
+
+	hasNoVulnText = "Project does not contain OSV vulnerabilities"
+	hasVulnText   = "Project contains OSV vulnerabilities"
+)
 
 var errNoVulnID = errors.New("no vuln ID")
 
@@ -44,9 +48,7 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 
 	// if no vulns were found
 	if len(raw.VulnerabilitiesResults.Vulnerabilities) == 0 {
-		f, err := finding.NewWith(fs, Probe,
-			"Project does not contain OSV vulnerabilities", nil,
-			finding.OutcomePositive)
+		f, err := finding.NewWith(fs, Probe, hasNoVulnText, nil, finding.OutcomePositive)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
@@ -78,7 +80,6 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 		f = f.WithRemediationMetadata(map[string]string{
 			"osvid": vuln.IDs[0],
 		})
-		// todo need location here. really we should be grouping in raw data, not in the probe
 		findings = append(findings, *f)
 	}
 	return findings, Probe, nil
