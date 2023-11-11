@@ -52,7 +52,7 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 	}
 
 	for _, vuln := range raw.VulnerabilitiesResults.Vulnerabilities {
-		f, err := finding.NewWith(fs, Probe, hasVulnText, vuln.Location, finding.OutcomeNegative)
+		f, err := finding.NewWith(fs, Probe, hasVulnText, &vuln.Locations[0], finding.OutcomeNegative)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
