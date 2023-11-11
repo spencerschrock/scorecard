@@ -41,7 +41,7 @@ type VulnerabilitiesResponse struct {
 
 // Vulnerability uniquely identifies a reported security vuln.
 type Vulnerability struct {
-	ID       string
-	Location *finding.Location
-	Aliases  []string
+	ID        string
+	Locations []finding.Location
+	Aliases   []string
 }

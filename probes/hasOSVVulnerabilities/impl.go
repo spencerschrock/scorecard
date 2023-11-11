@@ -70,9 +70,7 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 		if len(vuln.IDs) == 0 {
 			return nil, Probe, errNoVulnID
 		}
-		f, err := finding.NewWith(fs, Probe,
-			"Project contains OSV vulnerabilities", nil,
-			finding.OutcomeNegative)
+		f, err := finding.NewWith(fs, Probe, hasVulnText, &vuln.Locations[0], finding.OutcomeNegative)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
