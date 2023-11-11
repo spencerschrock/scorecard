@@ -63,21 +63,45 @@ func (v osvClient) ListUnfixedVulnerabilities(
 		return response, nil
 	}
 
+	vulnLocations := map[string][]finding.Location{}
 	// If vulnerabilities are found, err will be set to osvscanner.VulnerabilitiesFoundErr
 	if errors.Is(err, osvscanner.VulnerabilitiesFoundErr) {
 		vulns := res.Flatten()
-		for i := range vulns {
+		for _, vuln := range vulns {
+			vuln := vuln
+			loc := location(&vuln, localPath)
+			if !update(vulnLocations, vuln.Vulnerability.ID, *loc) {
+				var found bool
+				for _, alias := range vuln.Vulnerability.Aliases {
+					if update(vulnLocations, alias, *loc) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					vulnLocations[vuln.Vulnerability.ID] = []finding.Location{*loc}
+				}
+			}
+		}
+		for vuln, locations := range vulnLocations {
 			response.Vulnerabilities = append(response.Vulnerabilities, Vulnerability{
-				ID:       vulns[i].Vulnerability.ID,
-				Aliases:  vulns[i].Vulnerability.Aliases,
-				Location: location(&vulns[i], localPath),
+				ID: vuln,
+				// Aliases:   vulns[i].Vulnerability.Aliases,
+				Locations: locations,
 			})
 		}
-
 		return response, nil
 	}
 
 	return VulnerabilitiesResponse{}, fmt.Errorf("osvscanner.DoScan: %w", err)
+}
+
+func update(m map[string][]finding.Location, key string, value finding.Location) bool {
+	if slice, ok := m[key]; ok {
+		m[key] = append(slice, value)
+		return true
+	}
+	return false
 }
 
 func location(vuln *models.VulnerabilityFlattened, pathPrefix string) *finding.Location {
