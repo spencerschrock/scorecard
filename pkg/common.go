@@ -60,6 +60,9 @@ func structuredResultString(d *checker.CheckDetail) string {
 		if f.Location.LineEnd != nil && *f.Location.LineStart < *f.Location.LineEnd {
 			sb.WriteString(fmt.Sprintf("-%d", *f.Location.LineEnd))
 		}
+		if f.Location.Snippet != nil {
+			sb.WriteString(fmt.Sprintf(": (%s)", *f.Location.Snippet))
+		}
 	}
 
 	// TODO(#3349) revisit remediation details later

@@ -24,10 +24,7 @@ import (
 )
 
 // Vulnerabilities applies the score policy for the Vulnerabilities check.
-func Vulnerabilities(name string,
-	findings []finding.Finding,
-	dl checker.DetailLogger,
-) checker.CheckResult {
+func Vulnerabilities(name string, findings []finding.Finding, dl checker.DetailLogger) checker.CheckResult {
 	expectedProbes := []string{
 		hasOSVVulnerabilities.Probe,
 	}
