@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/osv-scanner/pkg/models"
 	"github.com/google/osv-scanner/pkg/osvscanner"
@@ -69,7 +70,7 @@ func (v osvClient) ListUnfixedVulnerabilities(
 			response.Vulnerabilities = append(response.Vulnerabilities, Vulnerability{
 				ID:       vulns[i].Vulnerability.ID,
 				Aliases:  vulns[i].Vulnerability.Aliases,
-				Location: location(&vulns[i]),
+				Location: location(&vulns[i], localPath),
 			})
 		}
 
@@ -79,13 +80,13 @@ func (v osvClient) ListUnfixedVulnerabilities(
 	return VulnerabilitiesResponse{}, fmt.Errorf("osvscanner.DoScan: %w", err)
 }
 
-func location(vuln *models.VulnerabilityFlattened) *finding.Location {
+func location(vuln *models.VulnerabilityFlattened, pathPrefix string) *finding.Location {
 	if vuln == nil {
 		return nil
 	}
 	return &finding.Location{
 		Type:    finding.FileTypeSource,
 		Snippet: &vuln.Package.Name,
-		Path:    vuln.Source.Path,
+		Path:    strings.TrimPrefix(vuln.Source.Path, pathPrefix),
 	}
 }
