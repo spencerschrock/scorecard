@@ -57,12 +57,12 @@ func BinaryArtifacts(req *checker.CheckRequest) (checker.BinaryArtifactData, err
 		CaseSensitive: false,
 	}, checkBinaryFileContent, &files)
 	if err != nil {
-		return checker.BinaryArtifactData{}, fmt.Errorf("%w", err)
+		return checker.BinaryArtifactData{}, fmt.Errorf("checking binary files: %w", err)
 	}
 	// Ignore validated gradle-wrapper.jar files if present
 	files, err = excludeValidatedGradleWrappers(c, files)
 	if err != nil {
-		return checker.BinaryArtifactData{}, fmt.Errorf("%w", err)
+		return checker.BinaryArtifactData{}, err
 	}
 
 	// No error, return the files.
@@ -200,7 +200,7 @@ func gradleWrapperValidated(c clients.RepoClient) (bool, error) {
 		CaseSensitive: false,
 	}, checkWorkflowValidatesGradleWrapper, &gradleWrapperValidatingWorkflowFile)
 	if err != nil {
-		return false, fmt.Errorf("%w", err)
+		return false, fmt.Errorf("checking gradle wrapper workflows: %w", err)
 	}
 	// no matching files, validation failed
 	if gradleWrapperValidatingWorkflowFile == "" {

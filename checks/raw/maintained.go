@@ -27,27 +27,27 @@ func Maintained(c *checker.CheckRequest) (checker.MaintainedData, error) {
 	// Archived status.
 	archived, err := c.RepoClient.IsArchived()
 	if err != nil {
-		return result, fmt.Errorf("%w", err)
+		return result, fmt.Errorf("IsArchived: %w", err)
 	}
 	result.ArchivedStatus.Status = archived
 
 	// Recent commits.
 	commits, err := c.RepoClient.ListCommits()
 	if err != nil {
-		return result, fmt.Errorf("%w", err)
+		return result, fmt.Errorf("ListCommits: %w", err)
 	}
 	result.DefaultBranchCommits = commits
 
 	// Recent issues.
 	issues, err := c.RepoClient.ListIssues()
 	if err != nil {
-		return result, fmt.Errorf("%w", err)
+		return result, fmt.Errorf("ListIssues: %w", err)
 	}
 	result.Issues = issues
 
 	createdAt, err := c.RepoClient.GetCreatedAt()
 	if err != nil {
-		return result, fmt.Errorf("%w", err)
+		return result, fmt.Errorf("GetCreatedAt: %w", err)
 	}
 	result.CreatedAt = createdAt
 

@@ -189,7 +189,7 @@ func (client *Client) GetDefaultBranchName() (string, error) {
 		return client.repourl.defaultBranch, nil
 	}
 
-	return "", fmt.Errorf("%w", errDefaultBranchEmpty)
+	return "", errDefaultBranchEmpty
 }
 
 // GetBranch implements RepoClient.GetBranch.

@@ -136,7 +136,7 @@ func FromBytes(content []byte, probeID string) (*Finding, error) {
 func New(loc embed.FS, probeID string) (*Finding, error) {
 	p, err := probe.New(loc, probeID)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("parsing probe: %w", err)
 	}
 
 	f := &Finding{

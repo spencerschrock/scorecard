@@ -102,7 +102,7 @@ func FromBytes(content []byte, probeID string) (*Probe, error) {
 func New(loc embed.FS, probeID string) (*Probe, error) {
 	content, err := loc.ReadFile("def.yml")
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("reading probe file: %w", err)
 	}
 	return FromBytes(content, probeID)
 }

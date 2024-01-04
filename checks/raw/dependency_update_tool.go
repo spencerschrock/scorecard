@@ -34,7 +34,7 @@ func DependencyUpdateTool(c clients.RepoClient) (checker.DependencyUpdateToolDat
 	var tools []checker.Tool
 	err := fileparser.OnAllFilesDo(c, checkDependencyFileExists, &tools)
 	if err != nil {
-		return checker.DependencyUpdateToolData{}, fmt.Errorf("%w", err)
+		return checker.DependencyUpdateToolData{}, fmt.Errorf("checking dependency config files: %w", err)
 	}
 
 	if len(tools) != 0 {

@@ -167,7 +167,7 @@ func Fuzzing(c *checker.CheckRequest) (checker.FuzzingData, error) {
 	var fuzzers []checker.Tool
 	usingCFLite, e := checkCFLite(c)
 	if e != nil {
-		return checker.FuzzingData{}, fmt.Errorf("%w", e)
+		return checker.FuzzingData{}, fmt.Errorf("CFlite: %w", e)
 	}
 	if usingCFLite {
 		fuzzers = append(fuzzers,
@@ -182,7 +182,7 @@ func Fuzzing(c *checker.CheckRequest) (checker.FuzzingData, error) {
 
 	usingOSSFuzz, e := checkOSSFuzz(c)
 	if e != nil {
-		return checker.FuzzingData{}, fmt.Errorf("%w", e)
+		return checker.FuzzingData{}, fmt.Errorf("OSSFuzz: %w", e)
 	}
 	if usingOSSFuzz {
 		fuzzers = append(fuzzers,
@@ -203,7 +203,7 @@ func Fuzzing(c *checker.CheckRequest) (checker.FuzzingData, error) {
 	for _, lang := range prominentLangs {
 		usingFuzzFunc, files, e := checkFuzzFunc(c, lang)
 		if e != nil {
-			return checker.FuzzingData{}, fmt.Errorf("%w", e)
+			return checker.FuzzingData{}, fmt.Errorf("check fuzz language: %w", e)
 		}
 		if usingFuzzFunc {
 			fuzzers = append(fuzzers,
@@ -229,7 +229,7 @@ func checkCFLite(c *checker.CheckRequest) (bool, error) {
 		return false, nil
 	}, nil)
 	if e != nil {
-		return result, fmt.Errorf("%w", e)
+		return result, fmt.Errorf("checking Dockerfile: %w", e)
 	}
 
 	return result, nil

@@ -123,7 +123,7 @@ func (c *Client) ListCommits() ([]clients.Commit, error) {
 
 			if commit == nil {
 				// Not sure in what case a nil commit is returned. Fail explicitly.
-				c.errListCommits = fmt.Errorf("%w", errNilCommitFound)
+				c.errListCommits = errNilCommitFound
 				return
 			}
 

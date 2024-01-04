@@ -29,14 +29,10 @@ func CodeReview(c clients.RepoClient) (checker.CodeReviewData, error) {
 	// Look at the latest commits.
 	commits, err := c.ListCommits()
 	if err != nil {
-		return checker.CodeReviewData{}, fmt.Errorf("%w", err)
+		return checker.CodeReviewData{}, fmt.Errorf("ListCommits: %w", err)
 	}
 
 	changesets := getChangesets(commits)
-
-	if err != nil {
-		return checker.CodeReviewData{}, fmt.Errorf("%w", err)
-	}
 
 	return checker.CodeReviewData{
 		DefaultBranchChangesets: changesets,

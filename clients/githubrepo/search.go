@@ -57,7 +57,7 @@ func (handler *searchHandler) search(request clients.SearchRequest) (clients.Sea
 
 func (handler *searchHandler) buildQuery(request clients.SearchRequest) (string, error) {
 	if request.Query == "" {
-		return "", fmt.Errorf("%w", errEmptyQuery)
+		return "", errEmptyQuery
 	}
 	var queryBuilder strings.Builder
 	if _, err := queryBuilder.WriteString(

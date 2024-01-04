@@ -57,7 +57,7 @@ func (handler *searchCommitsHandler) search(request clients.SearchCommitsOptions
 
 func (handler *searchCommitsHandler) buildQuery(request clients.SearchCommitsOptions) (string, error) {
 	if request.Author == "" {
-		return "", fmt.Errorf("%w", errEmptyQuery)
+		return "", errEmptyQuery
 	}
 	var queryBuilder strings.Builder
 	if _, err := queryBuilder.WriteString(

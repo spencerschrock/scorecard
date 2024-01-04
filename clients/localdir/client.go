@@ -77,7 +77,7 @@ func (client *localDirClient) IsArchived() (bool, error) {
 func isDir(p string) (bool, error) {
 	fileInfo, err := os.Stat(p)
 	if err != nil {
-		return false, fmt.Errorf("%w", err)
+		return false, fmt.Errorf("checking directory %q: %w", p, err)
 	}
 
 	return fileInfo.IsDir(), nil
@@ -164,7 +164,7 @@ func getFileContent(clientpath, filename string) ([]byte, error) {
 	fn := path.Join(clientpath, filename)
 	content, err := os.ReadFile(fn)
 	if err != nil {
-		return content, fmt.Errorf("%w", err)
+		return content, fmt.Errorf("reading %q: %w", fn, err)
 	}
 	return content, nil
 }

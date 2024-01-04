@@ -30,9 +30,6 @@ func Packaging(c *checker.CheckRequest) (checker.PackagingData, error) {
 	var data checker.PackagingData
 	matchedFiles, err := c.RepoClient.ListFiles(fileparser.IsGithubWorkflowFileCb)
 	if err != nil {
-		return data, fmt.Errorf("%w", err)
-	}
-	if err != nil {
 		return data, fmt.Errorf("RepoClient.ListFiles: %w", err)
 	}
 

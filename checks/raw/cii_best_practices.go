@@ -27,12 +27,12 @@ var errEmptyClient = errors.New("CII client is nil")
 func CIIBestPractices(c *checker.CheckRequest) (checker.CIIBestPracticesData, error) {
 	var results checker.CIIBestPracticesData
 	if c.CIIClient == nil {
-		return results, fmt.Errorf("%w", errEmptyClient)
+		return results, errEmptyClient
 	}
 
 	badge, err := c.CIIClient.GetBadgeLevel(c.Ctx, c.Repo.URI())
 	if err != nil {
-		return results, fmt.Errorf("%w", err)
+		return results, fmt.Errorf("getting badge level: %w", err)
 	}
 	results.Badge = badge
 

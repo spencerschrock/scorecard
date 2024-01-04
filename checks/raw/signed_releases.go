@@ -24,7 +24,7 @@ import (
 func SignedReleases(c *checker.CheckRequest) (checker.SignedReleasesData, error) {
 	releases, err := c.RepoClient.ListReleases()
 	if err != nil {
-		return checker.SignedReleasesData{}, fmt.Errorf("%w", err)
+		return checker.SignedReleasesData{}, fmt.Errorf("ListReleases: %w", err)
 	}
 
 	return checker.SignedReleasesData{

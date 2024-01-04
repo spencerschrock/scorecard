@@ -50,11 +50,11 @@ func (r *repoLocal) String() string {
 func (r *repoLocal) IsValid() error {
 	f, err := os.Stat(r.path)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("checking local directory: %w", err)
 	}
 
 	if !f.IsDir() {
-		return fmt.Errorf("%w", errNotDirectory)
+		return errNotDirectory
 	}
 	return nil
 }

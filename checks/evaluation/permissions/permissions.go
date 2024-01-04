@@ -189,7 +189,7 @@ func reportDefaultFindings(results *checker.TokenPermissionsData,
 func reportFinding(probe, text string, o finding.Outcome, dl checker.DetailLogger) error {
 	content, err := probes.ReadFile(probe + ".yml")
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("reading probe yaml: %w", err)
 	}
 	f, err := finding.FromBytes(content, probe)
 	if err != nil {
@@ -209,7 +209,7 @@ func createLogMsg(loct *checker.PermissionLocation) (*checker.LogMessage, error)
 	}
 	content, err := probes.ReadFile(probe + ".yml")
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("reading probe yaml: %w", err)
 	}
 	f, err := finding.FromBytes(content, probe)
 	if err != nil {

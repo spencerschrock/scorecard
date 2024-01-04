@@ -58,19 +58,19 @@ func BranchProtection(c clients.RepoClient) (checker.BranchProtectionsData, erro
 	// Add default branch.
 	defaultBranch, err := c.GetDefaultBranch()
 	if err != nil {
-		return checker.BranchProtectionsData{}, fmt.Errorf("%w", err)
+		return checker.BranchProtectionsData{}, fmt.Errorf("getting default branch: %w", err)
 	}
 	branches.add(defaultBranch)
 
 	// Get release branches.
 	releases, err := c.ListReleases()
 	if err != nil {
-		return checker.BranchProtectionsData{}, fmt.Errorf("%w", err)
+		return checker.BranchProtectionsData{}, fmt.Errorf("list releases: %w", err)
 	}
 	for _, release := range releases {
 		if release.TargetCommitish == "" {
 			// Log with a named error if target_commitish is nil.
-			return checker.BranchProtectionsData{}, fmt.Errorf("%w", errInternalCommitishNil)
+			return checker.BranchProtectionsData{}, errInternalCommitishNil
 		}
 
 		// TODO: if this is a sha, get the associated branch. for now, ignore.
