@@ -17,7 +17,6 @@ package checks
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -303,7 +302,7 @@ func Test_SAST(t *testing.T) {
 				}
 				content, err := os.ReadFile("./testdata/" + tt.path)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			}).AnyTimes()

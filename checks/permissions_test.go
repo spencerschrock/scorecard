@@ -15,7 +15,6 @@
 package checks
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -446,7 +445,7 @@ func TestGithubTokenPermissions(t *testing.T) {
 			mockRepo.EXPECT().GetFileContent(gomock.Any()).DoAndReturn(func(fn string) ([]byte, error) {
 				content, err := os.ReadFile("./testdata/" + fn)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			}).AnyTimes()

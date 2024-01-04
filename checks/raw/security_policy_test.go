@@ -15,7 +15,6 @@
 package raw
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -151,7 +150,7 @@ func TestSecurityPolicy(t *testing.T) {
 				}
 				content, err := os.ReadFile(tt.path)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			}).AnyTimes()

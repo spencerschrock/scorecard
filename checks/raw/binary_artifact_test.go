@@ -15,7 +15,6 @@
 package raw
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -231,7 +230,7 @@ func TestBinaryArtifacts(t *testing.T) {
 					// This will read the file and return the content
 					content, err := os.ReadFile(file)
 					if err != nil {
-						return content, fmt.Errorf("%w", err)
+						return content, err
 					}
 					return content, nil
 				})
@@ -279,14 +278,14 @@ func TestBinaryArtifacts_workflow_runs_unsupported(t *testing.T) {
 	mockRepoClient.EXPECT().GetFileContent(jarFile).DoAndReturn(func(file string) ([]byte, error) {
 		content, err := os.ReadFile("../testdata/binaryartifacts/jars/gradle-wrapper.jar")
 		if err != nil {
-			return nil, fmt.Errorf("%w", err)
+			return nil, err
 		}
 		return content, nil
 	}).AnyTimes()
 	mockRepoClient.EXPECT().GetFileContent(verifyWorkflow).DoAndReturn(func(file string) ([]byte, error) {
 		content, err := os.ReadFile("../testdata/binaryartifacts/workflows/verify.yaml")
 		if err != nil {
-			return nil, fmt.Errorf("%w", err)
+			return nil, err
 		}
 		return content, nil
 	}).AnyTimes()

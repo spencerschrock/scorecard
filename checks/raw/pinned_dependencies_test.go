@@ -15,7 +15,6 @@
 package raw
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -1724,7 +1723,7 @@ func TestCollectDockerfilePinning(t *testing.T) {
 				// This will read the file and return the content
 				content, err := os.ReadFile(file)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			})
@@ -1823,7 +1822,7 @@ func TestCollectGitHubActionsWorkflowPinning(t *testing.T) {
 				// This will read the file and return the content
 				content, err := os.ReadFile(filepath.Join("testdata", file))
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			})

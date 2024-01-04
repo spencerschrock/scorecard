@@ -15,7 +15,6 @@
 package raw
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -211,7 +210,7 @@ func TestSAST(t *testing.T) {
 				// This will read the file and return the content
 				content, err := os.ReadFile("./testdata/" + file)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			}).AnyTimes()

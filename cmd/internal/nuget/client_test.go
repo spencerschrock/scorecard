@@ -608,7 +608,7 @@ func testResult(wantErr bool, responseFileName string) (*http.Response, error) {
 	}
 	content, err := os.ReadFile("./testdata/" + responseFileName)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, err
 	}
 	return &http.Response{
 		StatusCode: http.StatusOK,

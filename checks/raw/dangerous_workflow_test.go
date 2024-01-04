@@ -17,7 +17,6 @@ package raw
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
@@ -163,7 +162,7 @@ func TestGithubDangerousWorkflow(t *testing.T) {
 				// This will read the file and return the content
 				content, err := os.ReadFile("../testdata/" + file)
 				if err != nil {
-					return content, fmt.Errorf("%w", err)
+					return content, err
 				}
 				return content, nil
 			})
