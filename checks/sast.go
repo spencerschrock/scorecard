@@ -54,5 +54,7 @@ func SAST(c *checker.CheckRequest) checker.CheckResult {
 	}
 
 	// Return the score evaluation.
-	return evaluation.SAST(CheckSAST, findings, c.Dlogger)
+	cr := evaluation.SAST(CheckSAST, findings, c.Dlogger)
+	cr.Findings = findings
+	return cr
 }

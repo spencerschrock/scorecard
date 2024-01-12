@@ -54,5 +54,7 @@ func CIIBestPractices(c *checker.CheckRequest) checker.CheckResult {
 	}
 
 	// Return the score evaluation.
-	return evaluation.CIIBestPractices(CheckCIIBestPractices, findings, c.Dlogger)
+	cr := evaluation.CIIBestPractices(CheckCIIBestPractices, findings, c.Dlogger)
+	cr.Findings = findings
+	return cr
 }

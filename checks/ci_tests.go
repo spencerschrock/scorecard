@@ -53,5 +53,7 @@ func CITests(c *checker.CheckRequest) checker.CheckResult {
 		return checker.CreateRuntimeErrorResult(CheckCITests, e)
 	}
 
-	return evaluation.CITests(CheckCITests, findings, c.Dlogger)
+	cr := evaluation.CITests(CheckCITests, findings, c.Dlogger)
+	cr.Findings = findings
+	return cr
 }

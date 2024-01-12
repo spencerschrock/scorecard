@@ -54,5 +54,7 @@ func Fuzzing(c *checker.CheckRequest) checker.CheckResult {
 	}
 
 	// Return the score evaluation.
-	return evaluation.Fuzzing(CheckFuzzing, findings, c.Dlogger)
+	cr := evaluation.Fuzzing(CheckFuzzing, findings, c.Dlogger)
+	cr.Findings = findings
+	return cr
 }

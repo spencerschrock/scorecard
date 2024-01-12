@@ -57,5 +57,7 @@ func BinaryArtifacts(c *checker.CheckRequest) checker.CheckResult {
 		return checker.CreateRuntimeErrorResult(CheckBinaryArtifacts, e)
 	}
 
-	return evaluation.BinaryArtifacts(CheckBinaryArtifacts, findings, c.Dlogger)
+	cr := evaluation.BinaryArtifacts(CheckBinaryArtifacts, findings, c.Dlogger)
+	cr.Findings = findings
+	return cr
 }
