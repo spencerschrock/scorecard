@@ -32,7 +32,6 @@ import (
 	"github.com/ossf/scorecard/v4/finding"
 	"github.com/ossf/scorecard/v4/options"
 	"github.com/ossf/scorecard/v4/probes"
-	"github.com/ossf/scorecard/v4/probes/zrunner"
 )
 
 // errEmptyRepository indicates the repository is empty.
@@ -165,24 +164,11 @@ func runScorecard(ctx context.Context,
 
 	for result := range resultsCh {
 		ret.Checks = append(ret.Checks, result)
+		if value, _ := os.LookupEnv(options.EnvVarScorecardExperimental); value == "1" {
+			ret.Findings = append(ret.Findings, result.Findings...)
+		}
 	}
 
-	if value, _ := os.LookupEnv(options.EnvVarScorecardExperimental); value == "1" {
-		// Run the probes.
-		var findings []finding.Finding
-		// TODO(#3049): only run the probes for checks.
-		// NOTE: We will need separate functions to support:
-		// - `--probes X,Y`
-		// - `--check-definitions-file path/to/config.yml
-		// NOTE: we discard the returned error because the errors are
-		// already contained in the findings and we want to return the findings
-		// to users.
-		// See https://github.com/ossf/scorecard/blob/main/probes/zrunner/runner.go#L34-L45.
-		// We also don't want the entire scorecard run to fail if a single error is encountered.
-		//nolint:errcheck
-		findings, _ = zrunner.Run(&ret.RawResults, probes.All)
-		ret.Findings = findings
-	}
 	return ret, nil
 }
 
