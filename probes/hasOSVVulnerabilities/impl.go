@@ -17,11 +17,8 @@ package hasOSVVulnerabilities
 
 import (
 	"embed"
-	"errors"
 	"fmt"
-	"strings"
 
-	"github.com/google/osv-scanner/pkg/grouper"
 	"github.com/ossf/scorecard/v4/checker"
 	"github.com/ossf/scorecard/v4/finding"
 	"github.com/ossf/scorecard/v4/probes/internal/utils/uerror"
@@ -36,8 +33,6 @@ const (
 	hasNoVulnText = "Project does not contain OSV vulnerabilities"
 	hasVulnText   = "Project contains OSV vulnerabilities"
 )
-
-var errNoVulnID = errors.New("no vuln ID")
 
 func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 	if raw == nil {
@@ -56,27 +51,14 @@ func Run(raw *checker.RawResults) ([]finding.Finding, string, error) {
 		return findings, Probe, nil
 	}
 
-	aliasVulnerabilities := []grouper.IDAliases{}
 	for _, vuln := range raw.VulnerabilitiesResults.Vulnerabilities {
-		aliasVulnerabilities = append(aliasVulnerabilities, grouper.IDAliases{
-			ID:      vuln.ID,
-			Aliases: vuln.Aliases,
-		})
-	}
-
-	IDs := grouper.Group(aliasVulnerabilities)
-
-	for _, vuln := range IDs {
-		if len(vuln.IDs) == 0 {
-			return nil, Probe, errNoVulnID
-		}
 		f, err := finding.NewWith(fs, Probe, hasVulnText, &vuln.Locations[0], finding.OutcomeNegative)
 		if err != nil {
 			return nil, Probe, fmt.Errorf("create finding: %w", err)
 		}
-		f = f.WithMessage("Project is vulnerable to: " + strings.Join(vuln.IDs, " / "))
+		f = f.WithMessage("Project is vulnerable to: " + vuln.ID)
 		f = f.WithRemediationMetadata(map[string]string{
-			"osvid": vuln.IDs[0],
+			"osvid": vuln.ID,
 		})
 		findings = append(findings, *f)
 	}
