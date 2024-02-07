@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	ngt "github.com/ossf/scorecard/v4/cmd/internal/nuget"
 	pmc "github.com/ossf/scorecard/v4/cmd/internal/packagemanager"

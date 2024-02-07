@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	pmc "github.com/ossf/scorecard/v4/cmd/internal/packagemanager"
 )

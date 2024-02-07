@@ -12,7 +12,6 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.9.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-logr/logr v1.4.1
-	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-containerregistry v0.19.0
 	github.com/grafeas/kritis v0.2.3-0.20210120183821-faeba81c520c
@@ -47,6 +46,7 @@ require (
 	github.com/mcuadros/go-jsonschema-generator v0.0.0-20200330054847-ba7a369d4303
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/otiai10/copy v1.14.0
+	go.uber.org/mock v0.4.0
 	sigs.k8s.io/release-utils v0.6.0
 )
 

@@ -18,7 +18,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	mockrepo "github.com/ossf/scorecard/v4/clients/mockclients"
 )
