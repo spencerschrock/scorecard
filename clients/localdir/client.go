@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -172,6 +173,21 @@ func getFileContent(clientpath, filename string) ([]byte, error) {
 // GetFileContent implements RepoClient.GetFileContent.
 func (client *localDirClient) GetFileContent(filename string) ([]byte, error) {
 	return getFileContent(client.path, filename)
+}
+
+func getFileReader(clientpath, filename string) (io.ReadCloser, error) {
+	// Note: the filenames do not contain the original path - see ListFiles().
+	fn := path.Join(clientpath, filename)
+	f, err := os.Open(fn)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+	return f, nil
+}
+
+// GetFileReader implements RepoClient.GetFileReader.
+func (client *localDirClient) GetFileReader(filename string) (io.ReadCloser, error) {
+	return getFileReader(client.path, filename)
 }
 
 // GetBranch implements RepoClient.GetBranch.
