@@ -17,6 +17,7 @@ package raw
 import (
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -32,6 +33,7 @@ import (
 	"github.com/ossf/scorecard/v4/clients"
 	sce "github.com/ossf/scorecard/v4/errors"
 	"github.com/ossf/scorecard/v4/finding"
+	"github.com/ossf/scorecard/v4/internal/repo"
 )
 
 var (
@@ -52,13 +54,24 @@ func mustParseConstraint(c string) *semver.Constraints {
 func BinaryArtifacts(req *checker.CheckRequest) (checker.BinaryArtifactData, error) {
 	c := req.RepoClient
 	files := []checker.File{}
-	err := fileparser.OnMatchingFileContentDo(c, fileparser.PathMatcher{
-		Pattern:       "*",
-		CaseSensitive: false,
-	}, checkBinaryFileContent, &files)
+
+	var err error
+	fr, ok := c.(repo.FileReader)
+	if ok {
+		err = fileparser.OnMatchingFileReaderDo(fr, fileparser.PathMatcher{
+			Pattern:       "*",
+			CaseSensitive: false,
+		}, checkBinaryFileReader, &files)
+	} else {
+		err = fileparser.OnMatchingFileContentDo(c, fileparser.PathMatcher{
+			Pattern:       "*",
+			CaseSensitive: false,
+		}, checkBinaryFileContent, &files)
+	}
 	if err != nil {
 		return checker.BinaryArtifactData{}, fmt.Errorf("%w", err)
 	}
+
 	// Ignore validated gradle-wrapper.jar files if present
 	files, err = excludeValidatedGradleWrappers(c, files)
 	if err != nil {
@@ -167,6 +180,14 @@ var checkBinaryFileContent fileparser.DoWhileTrueOnFileContent = func(path strin
 	}
 
 	return true, nil
+}
+
+var checkBinaryFileReader fileparser.DoWhileTrueOnFileReader = func(path string, reader io.Reader,
+	args ...interface{},
+) (bool, error) {
+	b := make([]byte, 1024)
+	reader.Read(b)
+	return checkBinaryFileContent(path, b, args...)
 }
 
 // determines if the first 1024 bytes are text

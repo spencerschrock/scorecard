@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -145,6 +146,11 @@ func (client *Client) LocalPath() (string, error) {
 // ListFiles implements RepoClient.ListFiles.
 func (client *Client) ListFiles(predicate func(string) (bool, error)) ([]string, error) {
 	return client.tarball.listFiles(predicate)
+}
+
+// GetFileContent implements RepoClient.GetFileContent.
+func (client *Client) GetFileReader(filename string) (io.ReadCloser, error) {
+	return client.tarball.getFileReader(filename)
 }
 
 // GetFileContent implements RepoClient.GetFileContent.

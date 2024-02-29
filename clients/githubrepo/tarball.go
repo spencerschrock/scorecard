@@ -260,6 +260,17 @@ func (handler *tarballHandler) getLocalPath() (string, error) {
 	return absTempDir, nil
 }
 
+func (handler *tarballHandler) getFileReader(filename string) (io.ReadCloser, error) {
+	if err := handler.setup(); err != nil {
+		return nil, fmt.Errorf("error during tarballHandler.setup: %w", err)
+	}
+	f, err := os.Open(filepath.Join(handler.tempDir, filename))
+	if err != nil {
+		return nil, fmt.Errorf("os.Open: %w", err)
+	}
+	return f, nil
+}
+
 func (handler *tarballHandler) getFileContent(filename string) ([]byte, error) {
 	if err := handler.setup(); err != nil {
 		return nil, fmt.Errorf("error during tarballHandler.setup: %w", err)
