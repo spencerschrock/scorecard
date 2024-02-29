@@ -17,11 +17,13 @@ package fileparser
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"path"
 	"strings"
 
 	"github.com/ossf/scorecard/v4/clients"
 	sce "github.com/ossf/scorecard/v4/errors"
+	"github.com/ossf/scorecard/v4/internal/repo"
 )
 
 // isMatchingPath uses 'pattern' to shell-match the 'path' and its filename
@@ -61,6 +63,55 @@ func isTestdataFile(fullpath string) bool {
 type PathMatcher struct {
 	Pattern       string
 	CaseSensitive bool
+}
+
+// DoWhileTrueOnFileReader takes a filepath, its reader and
+// optional variadic args. It returns a boolean indicating whether
+// iterating over next files should continue.
+type DoWhileTrueOnFileReader func(path string, reader io.Reader, args ...interface{}) (bool, error)
+
+// OnMatchingFileReaderDo matches all files listed by `repoClient` against `matchPathTo`
+// and on every successful match, runs onFileContent fn on the file's contents.
+// Continues iterating along the matched files until onFileContent returns
+// either a false value or an error.
+func OnMatchingFileReaderDo(repoClient repo.FileReader, matchPathTo PathMatcher,
+	onFileReader DoWhileTrueOnFileReader, args ...interface{},
+) error {
+	predicate := func(filepath string) (bool, error) {
+		// Filter out test files.
+		if isTestdataFile(filepath) {
+			return false, nil
+		}
+		// Filter out files based on path/names using the pattern.
+		b, err := isMatchingPath(filepath, matchPathTo)
+		if err != nil {
+			return false, err
+		}
+		return b, nil
+	}
+
+	matchedFiles, err := repoClient.ListFiles(predicate)
+	if err != nil {
+		return fmt.Errorf("error during ListFiles: %w", err)
+	}
+
+	for _, file := range matchedFiles {
+		reader, err := repoClient.GetFileReader(file)
+		if err != nil {
+			return fmt.Errorf("error during GetFileReader: %w", err)
+		}
+
+		continueIter, err := onFileReader(file, reader, args...)
+		if err != nil {
+			return err
+		}
+
+		if !continueIter {
+			break
+		}
+	}
+
+	return nil
 }
 
 // DoWhileTrueOnFileContent takes a filepath, its content and
