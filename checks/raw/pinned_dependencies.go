@@ -15,8 +15,10 @@
 package raw
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -74,15 +76,15 @@ func dataAsPinnedDependenciesPointer(data interface{}) *checker.PinningDependenc
 }
 
 func collectShellScriptInsecureDownloads(c *checker.CheckRequest, r *checker.PinningDependenciesData) error {
-	return fileparser.OnMatchingFileContentDo(c.RepoClient, fileparser.PathMatcher{
+	return fileparser.OnMatchingFileReaderDo(c.RepoClient, fileparser.PathMatcher{
 		Pattern:       "*",
 		CaseSensitive: false,
 	}, validateShellScriptIsFreeOfInsecureDownloads, r)
 }
 
-var validateShellScriptIsFreeOfInsecureDownloads fileparser.DoWhileTrueOnFileContent = func(
+var validateShellScriptIsFreeOfInsecureDownloads fileparser.DoWhileTrueOnFileReader = func(
 	pathfn string,
-	content []byte,
+	reader io.Reader,
 	args ...interface{},
 ) (bool, error) {
 	if len(args) != 1 {
@@ -93,11 +95,21 @@ var validateShellScriptIsFreeOfInsecureDownloads fileparser.DoWhileTrueOnFileCon
 
 	pdata := dataAsPinnedDependenciesPointer(args[0])
 
+	br := bufio.NewReader(reader)
+	extension := filepath.Ext(pathfn)
+	line, err := br.ReadBytes('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return false, err
+	}
 	// Validate the file type.
-	if !isSupportedShellScriptFile(pathfn, content) {
+	if !isSupportedShellScript(extension, string(line), supportedShells) {
 		return true, nil
 	}
-
+	rest, err := io.ReadAll(br)
+	if err != nil {
+		return false, err
+	}
+	content := append(line, rest...)
 	if err := validateShellFile(pathfn, 0, 0, content, map[string]bool{}, pdata); err != nil {
 		return false, nil
 	}

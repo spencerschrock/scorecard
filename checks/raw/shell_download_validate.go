@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"path"
 	"path/filepath"
@@ -1182,38 +1183,27 @@ func isSupportedShell(shellName string) bool {
 }
 
 func isShellScriptFile(pathfn string, content []byte) bool {
-	return isMatchingShellScriptFile(pathfn, content, shellInterpreters)
+	r := bytes.NewReader(content)
+	return isMatchingShellScript(pathfn, r, shellInterpreters)
 }
 
-// isSupportedShellScriptFile returns true if this file is one of the shell scripts we can parse. If a shebang
+// isSupportedShellScriptReader returns true if this file is one of the shell scripts we can parse. If a shebang
 // is present in the file, the decision is based entirely on that, otherwise the file extension is used to decide.
-
-func isSupportedShellScriptFile(pathfn string, content []byte) bool {
-	return isMatchingShellScriptFile(pathfn, content, supportedShells)
+func isSupportedShellScriptReader(pathfn string, r io.Reader) bool {
+	return isMatchingShellScript(pathfn, r, supportedShells)
 }
 
-func isMatchingShellScriptFile(pathfn string, content []byte, shellsToMatch []string) bool {
-	// Determine if it matches the file extension first.
-	hasShellFileExtension := false
-	for _, name := range shellsToMatch {
+func isSupportedShellScript(ext, line string, shellsToMatch []string) bool {
+	ext = strings.TrimPrefix(ext, ".")
+	line = strings.TrimSpace(line)
+	var hasShellFileExtension bool
+	for _, shell := range shellsToMatch {
 		// Look at the prefix.
-		if strings.HasSuffix(pathfn, "."+name) {
+		if ext == shell {
 			hasShellFileExtension = true
 			break
 		}
 	}
-
-	// Look at file content.
-	r := strings.NewReader(string(content))
-	scanner := bufio.NewScanner(r)
-	// TODO: support perl scripts with embedded shell scripts:
-	// https://github.com/openssl/openssl/blob/master/test/recipes/15-test_dsaparam.t.
-
-	// Only look at first line.
-	if !scanner.Scan() {
-		return hasShellFileExtension
-	}
-	line := scanner.Text()
 
 	//  #!/bin/XXX, #!XXX, #!/usr/bin/env XXX, #!env XXX
 	if !strings.HasPrefix(line, "#!") {
@@ -1238,6 +1228,18 @@ func isMatchingShellScriptFile(pathfn string, content []byte, shellsToMatch []st
 	}
 
 	return false // It has a shebang, but it's not one of our matching shells.
+}
+
+func isMatchingShellScript(pathfn string, r io.Reader, shellsToMatch []string) bool {
+	ext := filepath.Ext(pathfn)
+	// Look at file content.
+	scanner := bufio.NewScanner(r)
+	// TODO: support perl scripts with embedded shell scripts:
+	// https://github.com/openssl/openssl/blob/master/test/recipes/15-test_dsaparam.t.
+	// Only look at first line.
+	scanner.Scan()
+	line := scanner.Text()
+	return isSupportedShellScript(ext, line, shellsToMatch)
 }
 
 func validateShellFile(pathfn string, startLine, endLine uint,

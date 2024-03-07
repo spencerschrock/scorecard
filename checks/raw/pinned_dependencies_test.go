@@ -1192,13 +1192,14 @@ func TestShellscriptInsecureDownloadsLineNumber(t *testing.T) {
 		tt := tt // Re-initializing variable so it is not changed while executing the closure below
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			content, err := os.ReadFile(tt.filename)
+			f, err := os.Open(tt.filename)
 			if err != nil {
-				t.Errorf("cannot read file: %v", err)
+				t.Fatalf("cannot read file: %v", err)
 			}
+			t.Cleanup(func() { f.Close() })
 
 			var r checker.PinningDependenciesData
-			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, content, &r)
+			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, f, &r)
 			if err != nil {
 				t.Errorf("error during validateShellScriptIsFreeOfInsecureDownloads: %v", err)
 			}
@@ -1493,19 +1494,20 @@ func TestShellScriptDownload(t *testing.T) {
 		tt := tt // Re-initializing variable so it is not changed while executing the closure below
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			var content []byte
+			var rc io.ReadCloser
 			var err error
 			if tt.filename == "" {
-				content = make([]byte, 0)
+				rc = io.NopCloser(strings.NewReader(""))
 			} else {
-				content, err = os.ReadFile(tt.filename)
+				rc, err = os.Open(tt.filename)
 				if err != nil {
-					t.Errorf("cannot read file: %v", err)
+					t.Fatalf("cannot read file: %v", err)
 				}
 			}
+			t.Cleanup(func() { rc.Close() })
 
 			var r checker.PinningDependenciesData
-			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, content, &r)
+			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, rc, &r)
 
 			if !errCmp(err, tt.err) {
 				t.Errorf(cmp.Diff(err, tt.err, cmpopts.EquateErrors()))
@@ -1550,16 +1552,14 @@ func TestShellScriptDownloadPinned(t *testing.T) {
 		tt := tt // Re-initializing variable so it is not changed while executing the closure below
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			var content []byte
-			var err error
-
-			content, err = os.ReadFile(tt.filename)
+			f, err := os.Open(tt.filename)
 			if err != nil {
-				t.Errorf("cannot read file: %v", err)
+				t.Fatalf("cannot read file: %v", err)
 			}
+			t.Cleanup(func() { f.Close() })
 
 			var r checker.PinningDependenciesData
-			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, content, &r)
+			_, err = validateShellScriptIsFreeOfInsecureDownloads(tt.filename, f, &r)
 
 			if !errCmp(err, tt.err) {
 				t.Errorf(cmp.Diff(err, tt.err, cmpopts.EquateErrors()))

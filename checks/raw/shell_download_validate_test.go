@@ -75,13 +75,12 @@ func TestIsSupportedShellScriptFile(t *testing.T) {
 		tt := tt // Re-initializing variable so it is not changed while executing the closure below
 		t.Run(tt.filename, func(t *testing.T) {
 			t.Parallel()
-			var content []byte
-			var err error
-			content, err = os.ReadFile(tt.filename)
+			f, err := os.Open(tt.filename)
 			if err != nil {
-				t.Errorf("cannot read file: %v", err)
+				t.Fatalf("cannot read file: %v", err)
 			}
-			result := isSupportedShellScriptFile(tt.filename, content)
+			t.Cleanup(func() { f.Close() })
+			result := isSupportedShellScriptReader(tt.filename, f)
 			if result != tt.expected {
 				t.Errorf("%v: Got (%v) expected (%v)", tt.name, result, tt.expected)
 			}
