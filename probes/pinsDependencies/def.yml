@@ -15,9 +15,11 @@
 id: pinsDependencies
 short: Check that the project pins dependencies to a specific digest.
 motivation: >
-  Pinned dependencies ensure that checking and deployment are all done with the same software, reducing deployment risks, simplifying debugging, and enabling reproducibility. They can help mitigate compromised dependencies from undermining the security of the project (in the case where you've evaluated the pinned dependency, you are confident it's not compromised, and a later version is released that is compromised).
+  Pinned dependencies ensure that checking and deployment are all done with the same software, reducing deployment risks, simplifying debugging, and enabling reproducibility.
+  They can help mitigate compromised dependencies from undermining the security of the project (in the case where you've evaluated the pinned dependency, you are confident it's not compromised, and a later version is released that is compromised).
 implementation: >
-  The probe works by looking for unpinned dependencies in Dockerfiles, shell scripts, and GitHub workflows which are used during the build and release process of a project. Special considerations for Go modules treat full semantic versions as pinned due to how the Go tool verifies downloaded content against the hashes when anyone first downloaded the module.
+  The probe works by looking for unpinned dependencies in Dockerfiles, shell scripts, and GitHub workflows which are used during the build and release process of a project.
+  Special considerations for Go modules treat full semantic versions as pinned due to how the Go tool verifies downloaded content against the hashes when anyone first downloaded the module.
 outcome:
   - For supported ecosystem, the probe returns OutcomePositive per pinned dependency.
   - For supported ecosystem, the probe returns OutcomeNegative per unpinned dependency.
@@ -26,3 +28,11 @@ remediation:
   effort: Medium
   text:
     - Pin dependencies by hash.
+  markdown:
+    - TODO
+ecosystem:
+  # languages: TODO
+  clients:
+    - github
+    - gitlab
+    - localdir

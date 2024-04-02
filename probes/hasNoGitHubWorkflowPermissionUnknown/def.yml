@@ -33,3 +33,10 @@ remediation:
     - Tick the 'Restrict permissions for GITHUB_TOKEN'
     - Untick other options
     - "NOTE: If you want to resolve multiple issues at once, you can visit [https://app.stepsecurity.io/securerepo](https://app.stepsecurity.io/securerepo) instead."
+ecosystem:
+  languages:
+    - all
+  clients:
+    - github
+    - gitlab
+    - localdir

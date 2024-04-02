@@ -17,7 +17,7 @@ short: Checks that the project runs tests in the CI for example with GitHub Acti
 motivation: >
   Running tests helps developers catch mistakes early on, which can reduce the number of vulnerabilities that find their way into a project.
 implementation: >
- The probe checks for tests in the projects CI jobs in the recent commits (~30).
+  The probe checks for tests in the projects CI jobs in the recent commits (~30).
 outcome:
   - The probe returns one OutcomePositive for each PR that ran CI tests and one OutcomeNegative for each PR that did not run CI tests.
   - The probe returns a single OutcomeNotApplicable if the projects has had no pull requests.
@@ -26,6 +26,8 @@ remediation:
   text:
     - Check-in scripts that run all the tests in your repository.
     - Integrate those scripts with a CI/CD platform that runs it on every pull request (e.g. if hosted on GitHub, [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/introduction-to-github-actions), [Prow](https://github.com/kubernetes/test-infra/tree/master/prow), etc).
+  markdown:
+    - TODO
 ecosystem:
   languages:
     - all
