@@ -28,6 +28,7 @@ import (
 	"github.com/ossf/scorecard/v5/probes/createdRecently"
 	"github.com/ossf/scorecard/v5/probes/dependencyUpdateToolConfigured"
 	"github.com/ossf/scorecard/v5/probes/dismissesStaleReviews"
+	"github.com/ossf/scorecard/v5/probes/foo"
 	"github.com/ossf/scorecard/v5/probes/fuzzed"
 	"github.com/ossf/scorecard/v5/probes/hasBinaryArtifacts"
 	"github.com/ossf/scorecard/v5/probes/hasDangerousWorkflowScriptInjection"
@@ -165,7 +166,9 @@ var (
 	}
 
 	// Probes which don't use pre-computed raw data but rather collect it themselves.
-	Independent = []IndependentProbeImpl{}
+	Independent = []IndependentProbeImpl{
+		foo.Run,
+	}
 )
 
 //nolint:gochecknoinits
