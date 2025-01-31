@@ -21,7 +21,7 @@ import (
 	"os"
 	"runtime/debug"
 
-	"github.com/google/osv-scanner/pkg/osvscanner"
+	"github.com/google/osv-scanner/v2/pkg/osvscanner"
 
 	sce "github.com/ossf/scorecard/v5/errors"
 )
@@ -67,12 +67,12 @@ func (v osvClient) ListUnfixedVulnerabilities(
 
 	// either no vulns found, or no packages detected by osvscanner, which likely means no vulns
 	// while there could still be vulns, not detecting any packages shouldn't be a runtime error.
-	if err == nil || errors.Is(err, osvscanner.NoPackagesFoundErr) {
+	if err == nil || errors.Is(err, osvscanner.ErrNoPackagesFound) {
 		return response, nil
 	}
 
 	// If vulnerabilities are found, err will be set to osvscanner.VulnerabilitiesFoundErr
-	if errors.Is(err, osvscanner.VulnerabilitiesFoundErr) {
+	if errors.Is(err, osvscanner.ErrVulnerabilitiesFound) {
 		vulns := res.Flatten()
 		for i := range vulns {
 			// ignore Go stdlib vulns. The go directive from the go.mod isn't a perfect metric
