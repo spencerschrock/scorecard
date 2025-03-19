@@ -1,6 +1,6 @@
 module github.com/ossf/scorecard/v5
 
-go 1.23.5
+go 1.23.6
 
 require (
 	cloud.google.com/go/bigquery v1.66.2
@@ -42,7 +42,7 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-github/v53 v53.2.0
-	github.com/google/osv-scanner/v2 v2.0.0-beta1
+	github.com/google/osv-scanner/v2 v2.0.0
 	github.com/in-toto/attestation v1.1.1
 	github.com/mcuadros/go-jsonschema-generator v0.0.0-20200330054847-ba7a369d4303
 	github.com/onsi/ginkgo/v2 v2.23.0
@@ -60,10 +60,10 @@ require (
 	cloud.google.com/go/kms v1.21.0 // indirect
 	cloud.google.com/go/longrunning v0.6.4 // indirect
 	dario.cat/mergo v1.0.0 // indirect
-	deps.dev/api/v3 v3.0.0-20250114022823-c1ebdca3d00a // indirect
-	deps.dev/util/maven v0.0.0-20250114022823-c1ebdca3d00a // indirect
-	deps.dev/util/resolve v0.0.0-20250114022823-c1ebdca3d00a // indirect
-	deps.dev/util/semver v0.0.0-20250114022823-c1ebdca3d00a // indirect
+	deps.dev/api/v3 v3.0.0-20250310223405-f4cf91c9e684 // indirect
+	deps.dev/util/maven v0.0.0-20250310223405-f4cf91c9e684 // indirect
+	deps.dev/util/resolve v0.0.0-20250310223405-f4cf91c9e684 // indirect
+	deps.dev/util/semver v0.0.0-20250310223405-f4cf91c9e684 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240806141605-e8a1dd7889d6 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20231105174938-2b5cbb29f3e2 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
@@ -110,21 +110,20 @@ require (
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-github/v69 v69.0.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/osv-scalibr v0.1.6-0.20250128013153-34aef7c77adf // indirect
+	github.com/google/osv-scalibr v0.1.7-0.20250312040353-7231ce1b74fc // indirect
 	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/groob/plist v0.1.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20240912202439-0a2b6291aafd // indirect
-	github.com/jedib0t/go-pretty/v6 v6.6.5 // indirect
+	github.com/jedib0t/go-pretty/v6 v6.6.7 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
-	github.com/microsoft/go-rustaudit v0.0.0-20240820110456-0e2abec02f8b // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
@@ -136,7 +135,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/opencontainers/runtime-spec v1.2.0 // indirect
 	github.com/opencontainers/selinux v1.11.1 // indirect
-	github.com/ossf/osv-schema/bindings/go v0.0.0-20250120003634-8059be3f33a9 // indirect
+	github.com/ossf/osv-schema/bindings/go v0.0.0-20250307000045-3bd4db56b691 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/package-url/packageurl-go v0.1.3 // indirect
@@ -146,12 +145,11 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/prometheus/prometheus v0.54.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/rust-secure-code/go-rustaudit v0.0.0-20250226111315-e20ec32e963c // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/spdx/gordf v0.0.0-20221230105357-b735bd5aac89 // indirect
 	github.com/spdx/tools-golang v0.5.5 // indirect
-	github.com/tidwall/gjson v1.18.0 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/jsonc v0.3.2 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.etcd.io/bbolt v1.3.11 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
@@ -165,13 +163,13 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/term v0.29.0 // indirect
+	golang.org/x/telemetry v0.0.0-20240522233618-39ace7a40ae7 // indirect
+	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/vuln v1.0.4 // indirect
+	golang.org/x/vuln v1.1.3 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 	k8s.io/api v0.29.3 // indirect
 	k8s.io/apimachinery v0.29.3 // indirect
 	k8s.io/client-go v0.29.3 // indirect
@@ -231,12 +229,12 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
-	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
-	golang.org/x/net v0.36.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7 // indirect
+	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.224.0 // indirect
 	google.golang.org/grpc v1.71.0 // indirect
