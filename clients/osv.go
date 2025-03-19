@@ -54,14 +54,14 @@ func (v osvClient) ListUnfixedVulnerabilities(
 	}
 	res, err := osvscanner.DoScan(osvscanner.ScannerActions{
 		DirectoryPaths: directoryPaths,
-		SkipGit:        true,
+		IncludeGitRoot: false,
 		Recursive:      true,
 		GitCommits:     gitCommits,
 		ExperimentalScannerActions: osvscanner.ExperimentalScannerActions{
 			CompareOffline:    v.local,
 			DownloadDatabases: v.local,
 		},
-	}, nil) // TODO: Do logging?
+	}) // TODO: Do logging?
 
 	response := VulnerabilitiesResponse{}
 
