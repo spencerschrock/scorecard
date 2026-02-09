@@ -361,5 +361,5 @@ func GetCriticalityValues() (map[string]string, error) {
 
 // GetAPIBaseURL returns the base URL for the Scorecard API.
 func GetAPIBaseURL() (string, error) {
-	return getStringConfigValue(apiBaseURL, configYAML, "APIBaseURL", "api-base-url")
+	return getScorecardParam("api-base-url")
 }

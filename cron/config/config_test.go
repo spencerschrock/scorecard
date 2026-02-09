@@ -419,6 +419,18 @@ func TestGetAPIResultsBucketURL(t *testing.T) {
 	})
 }
 
+//nolint:paralleltest // Since os.Unsetenv is used.
+func TestGetAPIBaseURL(t *testing.T) {
+	os.Unsetenv(apiBaseURL)
+	baseURL, err := GetAPIBaseURL()
+	if err != nil {
+		t.Errorf("failed to get production base URL from config: %v", err)
+	}
+	if baseURL != prodAPIBaseURL {
+		t.Errorf("test failed: expected - %s, got = %s", prodAPIBaseURL, baseURL)
+	}
+}
+
 //nolint:paralleltest // Since os.Setenv is used.
 func TestInputBucket(t *testing.T) {
 	tests := []struct {
