@@ -28,6 +28,25 @@ import (
 	"github.com/ossf/scorecard/v5/log"
 )
 
+type prCheckRunsNode struct {
+	HeadRefOid githubv4.String
+	Commits    struct {
+		Nodes []struct {
+			Commit struct {
+				CheckSuites struct {
+					Nodes []struct {
+						App struct {
+							Slug githubv4.String
+						}
+						Conclusion githubv4.CheckConclusionState
+						Status     githubv4.CheckStatusState
+					}
+				} `graphql:"checkSuites(first: $checksToAnalyze)"`
+			}
+		}
+	} `graphql:"commits(last:1)"`
+}
+
 //nolint:govet
 type checkRunsGraphqlData struct {
 	Repository struct {
@@ -36,24 +55,7 @@ type checkRunsGraphqlData struct {
 				History struct {
 					Nodes []struct {
 						AssociatedPullRequests struct {
-							Nodes []struct {
-								HeadRefOid githubv4.String
-								Commits    struct {
-									Nodes []struct {
-										Commit struct {
-											CheckSuites struct {
-												Nodes []struct {
-													App struct {
-														Slug githubv4.String
-													}
-													Conclusion githubv4.CheckConclusionState
-													Status     githubv4.CheckStatusState
-												}
-											} `graphql:"checkSuites(first: $checksToAnalyze)"`
-										}
-									}
-								} `graphql:"commits(last:1)"`
-							}
+							Nodes []prCheckRunsNode
 						} `graphql:"associatedPullRequests(first: $pullRequestsToAnalyze)"`
 					}
 				} `graphql:"history(first: $commitsToAnalyze)"`
@@ -63,6 +65,14 @@ type checkRunsGraphqlData struct {
 	RateLimit struct {
 		Cost *int
 	}
+}
+
+type closedPRCheckRunsGraphqlData struct {
+	Repository struct {
+		PullRequests struct {
+			Nodes []prCheckRunsNode
+		} `graphql:"pullRequests(first: $closedPRsToAnalyze, states: [CLOSED], orderBy:{field:UPDATED_AT, direction:DESC})"`
+	} `graphql:"repository(owner: $owner, name: $name)"`
 }
 
 type checkRunsByRef = map[string][]clients.CheckRun
@@ -75,9 +85,11 @@ type checkrunsHandler struct {
 	logger         *log.Logger
 	checkData      *checkRunsGraphqlData
 	setupOnce      *sync.Once
+	closedOnce     *sync.Once
 	ctx            context.Context
 	commitDepth    int
 	checkRunsByRef checkRunsByRef
+	closedByRef    checkRunsByRef
 	errSetup       error
 }
 
@@ -88,7 +100,9 @@ func (handler *checkrunsHandler) init(ctx context.Context, repourl *Repo, commit
 	handler.logger = log.NewLogger(log.DefaultLevel)
 	handler.checkData = new(checkRunsGraphqlData)
 	handler.setupOnce = new(sync.Once)
+	handler.closedOnce = new(sync.Once)
 	handler.checkRunsByRef = checkRunsByRef{}
+	handler.closedByRef = checkRunsByRef{}
 	handler.errSetup = nil
 }
 
@@ -124,11 +138,31 @@ func (handler *checkrunsHandler) setup() error {
 	return handler.errSetup
 }
 
+func (handler *checkrunsHandler) setupClosedPRs() {
+	handler.closedOnce.Do(func() {
+		var data closedPRCheckRunsGraphqlData
+		vars := map[string]interface{}{
+			"owner":              githubv4.String(handler.repourl.owner),
+			"name":               githubv4.String(handler.repourl.repo),
+			"closedPRsToAnalyze": githubv4.Int(closedPRsToAnalyze),
+			"checksToAnalyze":    githubv4.Int(checksToAnalyze),
+		}
+		if err := handler.graphClient.Query(handler.ctx, &data, vars); err != nil {
+			return
+		}
+		addPRCheckRuns(handler.closedByRef, data.Repository.PullRequests.Nodes)
+	})
+}
+
 func (handler *checkrunsHandler) listCheckRunsForRef(ref string) ([]clients.CheckRun, error) {
 	if err := handler.setup(); err != nil {
 		return nil, fmt.Errorf("error during graphqlHandler.setupCheckRuns: %w", err)
 	}
 	if crs, ok := handler.checkRunsByRef[ref]; ok {
+		return crs, nil
+	}
+	handler.setupClosedPRs()
+	if crs, ok := handler.closedByRef[ref]; ok {
 		return crs, nil
 	}
 	msg := fmt.Sprintf("listCheckRunsForRef cache miss: %s/%s:%s", handler.repourl.owner, handler.repourl.repo, ref)
@@ -146,25 +180,29 @@ func (handler *checkrunsHandler) listCheckRunsForRef(ref string) ([]clients.Chec
 func parseCheckRuns(data *checkRunsGraphqlData) checkRunsByRef {
 	checkCache := checkRunsByRef{}
 	for _, commit := range data.Repository.Object.Commit.History.Nodes {
-		for _, pr := range commit.AssociatedPullRequests.Nodes {
-			var crs []clients.CheckRun
-			for _, c := range pr.Commits.Nodes {
-				for _, checkRun := range c.Commit.CheckSuites.Nodes {
-					crs = append(crs, clients.CheckRun{
-						// the REST API returns lowercase. the graphQL API returns upper
-						Status:     strings.ToLower(string(checkRun.Status)),
-						Conclusion: strings.ToLower(string(checkRun.Conclusion)),
-						App: clients.CheckRunApp{
-							Slug: string(checkRun.App.Slug),
-						},
-					})
-				}
-			}
-			headRef := string(pr.HeadRefOid)
-			checkCache[headRef] = crs
-		}
+		addPRCheckRuns(checkCache, commit.AssociatedPullRequests.Nodes)
 	}
 	return checkCache
+}
+
+func addPRCheckRuns(checkCache checkRunsByRef, prs []prCheckRunsNode) {
+	for _, pr := range prs {
+		var crs []clients.CheckRun
+		for _, c := range pr.Commits.Nodes {
+			for _, checkRun := range c.Commit.CheckSuites.Nodes {
+				crs = append(crs, clients.CheckRun{
+					// the REST API returns lowercase. the graphQL API returns upper
+					Status:     strings.ToLower(string(checkRun.Status)),
+					Conclusion: strings.ToLower(string(checkRun.Conclusion)),
+					App: clients.CheckRunApp{
+						Slug: string(checkRun.App.Slug),
+					},
+				})
+			}
+		}
+		headRef := string(pr.HeadRefOid)
+		checkCache[headRef] = crs
+	}
 }
 
 func checkRunsFrom(data *github.ListCheckRunsResults) []clients.CheckRun {

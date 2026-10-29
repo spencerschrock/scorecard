@@ -17,6 +17,7 @@ package githubrepo
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -29,6 +30,7 @@ import (
 
 const (
 	pullRequestsToAnalyze  = 1
+	closedPRsToAnalyze     = 60
 	checksToAnalyze        = 30
 	issuesToAnalyze        = 30
 	issueCommentsToAnalyze = 30
@@ -39,6 +41,18 @@ const (
 	defaultPageLimit = 100
 	retryLimit       = 3
 )
+
+// reClosingKeyword matches GitHub closing keywords followed by a supported issue or PR reference:
+// https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue
+// https://docs.github.com/en/articles/autolinked-references-and-urls#issues-and-pull-requests
+var reClosingKeyword = regexp.MustCompile(
+	`(?i)\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?):?\s+` +
+		`(?:#\d+|gh-\d+|[\w.-]+/[\w.-]+#\d+|https?://[^/\s]+/[\w.-]+/[\w.-]+/(?:issues|pull)/\d+)\b`,
+)
+
+func hasClosingKeyword(msg string) bool {
+	return reClosingKeyword.MatchString(msg)
+}
 
 //nolint:govet
 type graphqlData struct {
@@ -134,6 +148,45 @@ type graphqlData struct {
 	}
 }
 
+//nolint:govet
+type closedPRsGraphqlData struct {
+	Repository struct {
+		PullRequests struct {
+			Nodes []struct {
+				Author struct {
+					Login        githubv4.String
+					ResourcePath githubv4.String
+				}
+				Number     githubv4.Int
+				HeadRefOid githubv4.String
+				ClosedAt   githubv4.DateTime
+				Reviews    struct {
+					Nodes []struct {
+						State  githubv4.String
+						Author struct {
+							Login githubv4.String
+						}
+					}
+				} `graphql:"reviews(last: $reviewsToAnalyze)"`
+				TimelineItems struct {
+					Nodes []struct {
+						ClosedEvent struct {
+							Actor struct {
+								Login githubv4.String
+							}
+							Closer struct {
+								Commit struct {
+									Oid githubv4.GitObjectID
+								} `graphql:"... on Commit"`
+							}
+						} `graphql:"... on ClosedEvent"`
+					}
+				} `graphql:"timelineItems(last: 1, itemTypes: [CLOSED_EVENT])"`
+			}
+		} `graphql:"pullRequests(first: $closedPRsToAnalyze, states: [CLOSED], orderBy:{field:UPDATED_AT, direction:DESC})"`
+	} `graphql:"repository(owner: $owner, name: $name)"`
+}
+
 type graphqlHandler struct {
 	client      *githubv4.Client
 	data        *graphqlData
@@ -187,7 +240,40 @@ func populateCommits(handler *graphqlHandler, vars map[string]interface{}) ([]cl
 		commitsLeft -= commitsRequested
 		commitsRequested = min(commitsRequested, commitsLeft)
 	}
+	if err := populateClosedPRs(handler, commits); err != nil {
+		return nil, err
+	}
 	return commits, nil
+}
+
+func populateClosedPRs(handler *graphqlHandler, commits []clients.Commit) error {
+	needsClosedPRs := false
+	for i := range commits {
+		if commits[i].AssociatedMergeRequest.Number == 0 && hasClosingKeyword(commits[i].Message) {
+			needsClosedPRs = true
+			break
+		}
+	}
+	if !needsClosedPRs {
+		return nil
+	}
+	var data closedPRsGraphqlData
+	vars := map[string]interface{}{
+		"owner":              githubv4.String(handler.repourl.owner),
+		"name":               githubv4.String(handler.repourl.repo),
+		"closedPRsToAnalyze": githubv4.Int(closedPRsToAnalyze),
+		"reviewsToAnalyze":   githubv4.Int(reviewsToAnalyze),
+	}
+	if err := handler.client.Query(handler.ctx, &data, vars); err != nil {
+		return sce.WithMessage(sce.ErrScorecardInternal, fmt.Sprintf("githubv4.Query: %v", err))
+	}
+	closedPRs := closedPullRequestsFrom(&data)
+	for i := range commits {
+		if commits[i].AssociatedMergeRequest.Number == 0 {
+			commits[i].AssociatedMergeRequest = closedPRs[commits[i].SHA]
+		}
+	}
+	return nil
 }
 
 func (handler *graphqlHandler) setup() error {
@@ -306,6 +392,45 @@ func commitsFrom(data *graphqlData, repoOwner, repoName string) ([]clients.Commi
 		})
 	}
 	return ret, nil
+}
+
+func closedPullRequestsFrom(data *closedPRsGraphqlData) map[string]clients.PullRequest {
+	ret := make(map[string]clients.PullRequest)
+	for i := range data.Repository.PullRequests.Nodes {
+		pr := data.Repository.PullRequests.Nodes[i]
+		for _, item := range pr.TimelineItems.Nodes {
+			oid := string(item.ClosedEvent.Closer.Commit.Oid)
+			if oid == "" {
+				continue
+			}
+			if _, exists := ret[oid]; exists {
+				continue
+			}
+			openedByBot := strings.HasPrefix(string(pr.Author.ResourcePath), "/apps/")
+			closedPR := clients.PullRequest{
+				Number:   int(pr.Number),
+				HeadSHA:  string(pr.HeadRefOid),
+				MergedAt: pr.ClosedAt.Time,
+				Author: clients.User{
+					Login: string(pr.Author.Login),
+					IsBot: openedByBot,
+				},
+				MergedBy: clients.User{
+					Login: string(item.ClosedEvent.Actor.Login),
+				},
+			}
+			for _, review := range pr.Reviews.Nodes {
+				closedPR.Reviews = append(closedPR.Reviews, clients.Review{
+					State: string(review.State),
+					Author: &clients.User{
+						Login: string(review.Author.Login),
+					},
+				})
+			}
+			ret[oid] = closedPR
+		}
+	}
+	return ret
 }
 
 func issuesFrom(data *graphqlData) []clients.Issue {
